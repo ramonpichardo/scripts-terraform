@@ -1,1 +1,1 @@
-# scripts-terraform
+# scripts-terraform-build-azure-vm
