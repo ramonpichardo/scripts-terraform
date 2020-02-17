@@ -1,109 +1,120 @@
-# Configure the Azure provider to connect to the subscription
-provider "azurerm" {
-  version         = "~>1.39.0"
-  subscription_id = "UUID_subscription"
-  tenant_id       = "UUID_tenant"
-}
+/* 
+Configure the Azure Provider to...
+  ... use latest non-beta version (see Azure Provider changelog on Github: https://github.com/terraform-providers/terraform-provider-azurerm/blob/master/CHANGELOG.md)
+  ... connect to the subscription "Enterprise Dev/Test"
+  */
+  provider "azurerm" {
+    version         = "~>1.44.0"
+    subscription_id = var.subscription_id
+    tenant_id       = var.tenant_id
+    }
 
-# Create a new resource group
-resource "azurerm_resource_group" "rg" {
-  name     = "rg_learning_terraform_owner_name"
-  location = "East US"
-  
-  tags     = {
-    environment = "dev"
-    owner       = "owner_name"
+# Create resource group
+  resource "azurerm_resource_group" "vm" {
+    name     = var.resource_group_name
+    location = var.location
+    tags     = var.tags
+    }
+
+# Get the existing subnet of the virtual network
+  data "azurerm_subnet" "existing" {
+    name                 = var.subnet_name
+    virtual_network_name = var.vnet_name
+    resource_group_name  = var.vnet_rg
+    }
+
+# Create network interface for virtual machine
+  resource "azurerm_network_interface" "vm" {
+    name                      = "nic_${var.vm_hostname}"
+    location                  = azurerm_resource_group.vm.location
+    resource_group_name       = azurerm_resource_group.vm.name
+    
+    ip_configuration {
+      name                          = "ipconfig1"
+      subnet_id                     = data.azurerm_subnet.existing.id
+      private_ip_address_allocation = var.private_ip_address_allocation
+      }
+
+    tags = var.tags
+    }
+
+# Generate random text for a unique storage account name
+  resource "random_id" "vm-sa" {
+    keepers = {
+      vm_hostname = var.vm_hostname
+      }
+
+    byte_length = 8
+    }
+
+# Create storage account for boot diagnostics
+  resource "azurerm_storage_account" "vm-sa" {
+    name                     = "bootdiag${lower(random_id.vm-sa.hex)}"
+    resource_group_name      = azurerm_resource_group.vm.name
+    location                 = var.location
+    account_tier             = var.account_tier
+    account_replication_type = var.account_replication_type
+    tags                     = var.tags
+    }
+
+# Create virtual machine
+  resource "azurerm_virtual_machine" "vm-windows" {
+    name                          = var.vm_hostname
+    location                      = var.location
+    resource_group_name           = azurerm_resource_group.vm.name
+    network_interface_ids         = ["${azurerm_network_interface.vm.id}"]
+    vm_size                       = var.vm_size
+    delete_os_disk_on_termination = var.delete_os_disk_on_termination
+
+    storage_image_reference {
+      publisher = var.vm_os_publisher
+      offer     = var.vm_os_offer
+      sku       = var.vm_os_sku
+      version   = var.vm_os_version
+      }
+
+    storage_os_disk {
+      name              = "osdisk_${var.vm_hostname}"
+      create_option     = "FromImage"
+      caching           = "ReadWrite"
+      managed_disk_type = var.storage_account_type
+      }
+
+    os_profile {
+      computer_name  = var.vm_hostname
+      admin_username = var.admin_username
+      admin_password = var.admin_password
+      }
+
+    os_profile_windows_config {
+      provision_vm_agent        = "true"
+      enable_automatic_upgrades = "true"
+      winrm {
+        protocol        = "http"
+        certificate_url = ""
+        }
+      }
+
+    boot_diagnostics {
+      enabled     = var.boot_diagnostics
+      storage_uri = azurerm_storage_account.vm-sa.primary_blob_endpoint
+      }
+
+    tags = var.tags
+    }
+
+# Install IIS on VM
+  resource "azurerm_virtual_machine_extension" "install-iis" {
+    name                 = var.vm_hostname
+    virtual_machine_id   = azurerm_virtual_machine.vm-windows.id    
+    publisher            = "Microsoft.Compute"
+    type                 = "CustomScriptExtension"
+    type_handler_version = "1.9"
+
+    settings = <<SETTINGS
+      {
+          "commandToExecute": "powershell.exe Set-ExecutionPolicy Bypass; Get-WindowsOptionalFeature -Online -FeatureName IIS* | Enable-WindowsOptionalFeature -Online"
+      }
+    SETTINGS
+
   }
-}
-
-# Use this data source to access information about an existing virtual network
-data "azurerm_virtual_network" "vnet" {
-  name                = "vnet_prod"
-  resource_group_name = "rg_prod"
-}
-
-# Use this data source to access information about an existing subnet within an existing virtual network
-data "azurerm_subnet" "snet" {
-  name                 = "snet_test"
-  virtual_network_name = "${data.azurerm_virtual_network.name}"
-  resource_group_name  = "${data.azurerm_virtual_network.resource_group_name}"
-}
-
-# Create Network Security Group and rule
-resource "azurerm_network_security_group" "nsg" {
-  name                = "myTFNSG"
-  location            = "East US"
-  resource_group_name = ${azurerm_resource_group.rg.name}
-
-  security_rule {
-    name                       = "RDP"
-    priority                   = 1001
-    direction                  = "Inbound"
-    access                     = "Allow"
-    protocol                   = "Tcp"
-    source_port_range          = "*"
-    destination_port_range     = "3389"
-    source_address_prefix      = "*"
-    destination_address_prefix = "*"
-  }
-}
-
-# Create network interface
-resource "azurerm_network_interface" "nic" {
-  name                      = "test2020nic0"
-  location                  = "East US"
-  resource_group_name       = ${azurerm_resource_group.rg.name}
-  network_security_group_id = ${azurerm_network_security_group.nsg.id}
-
-  ip_configuration {
-    name                          = "testconfig1"
-    subnet_id                     = ${data.azurerm_subnet.snet.id}
-    private_ip_address_allocation = "dynamic"
-  }
-
-  tags = {
-    environment = "dev"
-    owner       = "Owner Name"
-  }
-}
-
-# Create a virtual machine
-resource "azurerm_virtual_machine" "test" {
-  name                  = "test2020it"
-  location              = "${azurerm_resource_group.rg.location}"
-  resource_group_name   = "${azurerm_resource_group.rg.name}"
-  network_interface_ids = ["${azurerm_network_interface.nic.id}"]
-  vm_size               = "Standard_B1ms" # https://docs.microsoft.com/en-us/azure/virtual-machines/windows/sizes
-
-# Uncomment this line to delete the OS disk automatically when deleting the VM
-# delete_os_disk_on_termination = true
-
-# Uncomment this line to delete the data disks automatically when deleting the VM
-# delete_data_disks_on_termination = true
-
-  storage_image_reference {
-    publisher           = "MicrosoftWindowsServer"
-    offer               = "WindowsServer"
-    sku                 = "2016-Datacenter-Server-Core-smalldisk"
-    version             = "latest"
-  }
-
-  storage_os_disk {
-    name                = "server-os"
-    caching             = "ReadWrite"
-    create_option       = "FromImage"
-    managed_disk_type   = "Standard_LRS"
-  }  
-
-  os_profile {
-    computer_name       = "${azurerm_virtual_machine.test.name}"
-    admin_username      = "itadmin01"
-    admin_password      = "Password2020!"
-  }
-
-  os_profile_windows_config {
-    provision_vm_agent        = true
-    enable_automatic_upgrades = true
-    timezone                  = "Pacific Standard Time"
-  }
-}
