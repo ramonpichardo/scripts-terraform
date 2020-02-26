@@ -1,30 +1,37 @@
 variable "account_tier" {
   description = "The tier of this storage account."
+  default     = "Standard"
 }
 
 variable "account_replication_type" {
   description = "The type of replication used for this storage account."
+  default     = "LRS"
 }
 
 variable "admin_password" {
   description = "The admin password to be used on the VMs that will be deployed. The password must meet the complexity requirements of Azure."
+  default     = ""
 }
 
 variable "admin_username" {
   description = "The admin username of the VM that will be deployed."
+  default     = ""
 }
 
 variable "boot_diagnostics" {
   description = "(Optional) Enable or Disable boot diagnostics."
+  default     = "true"
 }
 
 variable "boot_diagnostics_sa_type" {
   description = "(Optional) Storage account type for boot diagnostics."
+  default     = "Standard_LRS"
 }
 
 variable "data_disk" {
   type        = string
   description = "Set to true to add a datadisk."
+  default     = "false"
 }
 
 variable "data_disk_size_gb" {
@@ -34,10 +41,12 @@ variable "data_disk_size_gb" {
 
 variable "data_sa_type" {
   description = "Data Disk Storage Account type."
+  default     = "Standard_LRS"
 }
 
 variable "delete_os_disk_on_termination" {
   description = "Delete datadisk when machine is terminated."
+  default     = "false"
 }
 
 variable "is_windows_image" {
@@ -47,6 +56,7 @@ variable "is_windows_image" {
 
 variable "location" {
   description = "The location/region where the virtual network is created. Changing this forces a new resource to be created."
+  default     = "westus2"
 }
 
 variable "nb_instances" {
@@ -66,6 +76,7 @@ variable "nsg_id" {
 
 variable "private_ip_address_allocation" {
   description = "Defines how an IP address is assigned. Options are Static or Dynamic."
+  default     = "Dynamic"
 }
 
 variable "public_ip_dns" {
@@ -80,6 +91,7 @@ variable "remote_port" {
 
 variable "resource_group_name" {
   description = "The name of the resource group in which the resources will be created."
+  default     = "rg_terraform_compute"
 }
 
 variable "ssh_key" {
@@ -88,35 +100,46 @@ variable "ssh_key" {
 }
 
 variable "storage_account_type" {
-  description = "Defines the type of storage account to be created. Valid options are Standard_LRS, Standard_ZRS, Standard_GRS, Standard_RAGRS, Premium_LRS."
+  description = "Defines the type of storage account to be created. Valid options are Standard_LRS, Premium_LRS, StandardSSD_LRS, Standard_ZRS, Standard_GRS, Standard_RAGRS."
+  default     = "StandardSSD_LRS"
 }
 
 variable "subnet_name" {
   description = "The subnet name of the virtual network where the virtual machines will reside."
+  default     = ""
 }
 
 variable "subscription_id" {
   type        = string
   description = "Select the Azure subscription by its GUID. The Azure subscription GUID is a Version 4 UUID."
+  default     = "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx"
 }
 
 variable "tags" {
   type        = map
   description = "A map of the tags to use on the resources that are deployed with this module."
   default = {
-    Environment = "Dev"
-    Owner       = "Infrastructure" 
-    Source      = "Terraform"
+    ApplicationOwner        = "Infrastructure"
+    BusinessUnit            = "Infrastructure"
+    Environment             = "Production"
+    InstantiationDate       = "2020-02-25"
+    LastChangeRequestNumber = "RFCnnnnn"
+    LifeCycleStage          = "In production"
+    Location                = "Azure"
+    Source                  = "Terraform"
+    SupportTeam             = "Infrastructure"
   }
 }
 
 variable "tenant_id" {
   type        = string
   description = "Azure Tenant ID"
+  default     = "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx"
 }
 
 variable "vm_hostname" {
   description = "Local name of the VM."
+  default     = "OFTENNNNNNNNNXX"
 }
 
 variable "vm_os_id" {
@@ -126,10 +149,12 @@ variable "vm_os_id" {
 
 variable "vm_os_offer" {
   description = "The name of the offer of the image that you want to deploy. This is ignored when vm_os_id or vm_os_simple are provided."
+  default     = "WindowsServer"
 }
 
 variable "vm_os_publisher" {
   description = "The name of the publisher of the image that you want to deploy. This is ignored when vm_os_id or vm_os_simple are provided."
+  default     = "MicrosoftWindowsServer"
 }
 
 variable "vm_os_simple" {
@@ -139,20 +164,25 @@ variable "vm_os_simple" {
 
 variable "vm_os_sku" {
   description = "The sku of the image that you want to deploy. This is ignored when vm_os_id or vm_os_simple are provided."
+  default     = "2016-Datacenter"
 }
 
 variable "vm_os_version" {
   description = "The version of the image that you want to deploy. This is ignored when vm_os_id or vm_os_simple are provided."
+  default     = "latest"
 }
 
 variable "vm_size" {
   description = "Specifies the size of the virtual machine."
+  default     = "Standard_B2s"
 }
 
 variable "vnet_name" {
   description = "The name of the virtual network where the virtual machines will reside."
+  default     = "vnet_xyz"
 }
 
 variable "vnet_rg" {
   description = "Specifies the name of the resource group the virtual network is located in."
+  default     = "rg_xyz"
 }
