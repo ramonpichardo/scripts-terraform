@@ -1,8 +1,4 @@
-/* 
-Configure the Azure Provider to...
-  ... use latest non-beta version (see Azure Provider changelog on Github: https://github.com/terraform-providers/terraform-provider-azurerm/blob/master/CHANGELOG.md)
-  ... connect to the subscription "Enterprise Dev/Test"
-  */
+# Configure the Azure Provider to use latest non-beta version (see Azure Provider changelog on Github: https://github.com/terraform-providers/terraform-provider-azurerm/blob/master/CHANGELOG.md)
   provider "azurerm" {
     version         = "~>1.44.0"
     subscription_id = var.subscription_id
@@ -33,6 +29,7 @@ Configure the Azure Provider to...
       name                          = "ipconfig1"
       subnet_id                     = data.azurerm_subnet.existing.id
       private_ip_address_allocation = var.private_ip_address_allocation
+      private_ip_address            = var.private_ip_address
       }
 
     tags = var.tags
@@ -102,19 +99,3 @@ Configure the Azure Provider to...
 
     tags = var.tags
     }
-
-# Install IIS on VM
-  resource "azurerm_virtual_machine_extension" "install-iis" {
-    name                 = var.vm_hostname
-    virtual_machine_id   = azurerm_virtual_machine.vm-windows.id    
-    publisher            = "Microsoft.Compute"
-    type                 = "CustomScriptExtension"
-    type_handler_version = "1.9"
-
-    settings = <<SETTINGS
-      {
-          "commandToExecute": "powershell.exe Set-ExecutionPolicy Bypass; Get-WindowsOptionalFeature -Online -FeatureName IIS* | Enable-WindowsOptionalFeature -Online"
-      }
-    SETTINGS
-
-  }
