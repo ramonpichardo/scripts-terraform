@@ -1,8 +1,9 @@
-# Configure the Azure Provider to use latest non-beta version (see Azure Provider changelog on Github: https://github.com/terraform-providers/terraform-provider-azurerm/blob/master/CHANGELOG.md)
+# Pin the Azure Provider to use version 2.0.0 (see Azure Provider changelog on Github: https://github.com/terraform-providers/terraform-provider-azurerm/blob/master/CHANGELOG.md)
   provider "azurerm" {
-    version         = "~>1.44.0"
+    version         = "=2.0.0"
     subscription_id = var.subscription_id
     tenant_id       = var.tenant_id
+    features {}
     }
 
 # Create resource group
@@ -21,7 +22,8 @@
 
 # Create network interface for virtual machine
   resource "azurerm_network_interface" "vm" {
-    name                      = "nic_${var.vm_hostname}"
+    count                     = var.num_instances
+    name                      = "nic_${var.vm_hostname}${count.index + 1}"
     location                  = azurerm_resource_group.vm.location
     resource_group_name       = azurerm_resource_group.vm.name
     
@@ -29,7 +31,7 @@
       name                          = "ipconfig1"
       subnet_id                     = data.azurerm_subnet.existing.id
       private_ip_address_allocation = var.private_ip_address_allocation
-      private_ip_address            = var.private_ip_address
+      private_ip_address            = "${var.private_ip_address}${count.index + 5}"
       }
 
     tags = var.tags
@@ -56,10 +58,11 @@
 
 # Create virtual machine
   resource "azurerm_virtual_machine" "vm-windows" {
-    name                          = var.vm_hostname
+    count                         = var.num_instances
+    name                          = "${var.vm_hostname}${count.index + 1}"
     location                      = var.location
     resource_group_name           = azurerm_resource_group.vm.name
-    network_interface_ids         = ["${azurerm_network_interface.vm.id}"]
+    network_interface_ids         = [azurerm_network_interface.vm[count.index].id]
     vm_size                       = var.vm_size
     delete_os_disk_on_termination = var.delete_os_disk_on_termination
 
@@ -71,14 +74,14 @@
       }
 
     storage_os_disk {
-      name              = "osdisk_${var.vm_hostname}"
+      name              = "osdisk_${var.vm_hostname}${count.index + 1}"
       create_option     = "FromImage"
       caching           = "ReadWrite"
       managed_disk_type = var.storage_account_type
       }
 
     os_profile {
-      computer_name  = var.vm_hostname
+      computer_name  = "${var.vm_hostname}${count.index + 1}"
       admin_username = var.admin_username
       admin_password = var.admin_password
       }
