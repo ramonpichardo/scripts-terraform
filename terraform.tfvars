@@ -1,12 +1,25 @@
 admin_password                = "Password_1234567890_!"
 admin_username                = "itadmin"
 delete_os_disk_on_termination = "true"
-private_ip_address            = 172.168.0.5
+num_instances                 = 3
+private_ip_address            = "172.168.0."
 private_ip_address_allocation = "Static"
 resource_group_name           = "rg_terraform_compute2"
 subscription_id               = "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx"
 subnet_name                   = "snet_spoke01_prod"
-vm_hostname                   = "testserver01"
+vm_hostname                   = "TESTSERVER0"
 vm_size                       = "Standard_A2m_v2"
 vnet_name                     = "vnet_prod"
 vnet_rg                       = "rg_networking"
+
+tags                = {
+  ApplicationOwner        = "Infrastructure"
+  BusinessUnit            = "Infrastructure"
+  Environment             = "Production"
+  InstantiationDate       = "2020-02-27"
+  LastChangeRequestNumber = "RFC47548"
+  LifeCycleStage          = "In production"
+  Location                = "Azure"
+  Source                  = "Terraform"
+  SupportTeam             = "Infrastructure"
+}
