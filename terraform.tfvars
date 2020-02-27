@@ -12,7 +12,7 @@ vm_size                       = "Standard_A2m_v2"
 vnet_name                     = "vnet_prod"
 vnet_rg                       = "rg_networking"
 
-tags                = {
+tags                          = {
   ApplicationOwner        = "Infrastructure"
   BusinessUnit            = "Infrastructure"
   Environment             = "Production"
