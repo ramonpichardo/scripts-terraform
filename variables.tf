@@ -59,12 +59,12 @@ variable "location" {
   default     = "westus2"
 }
 
-variable "nb_instances" {
+variable "num_instances" {
   description = "Specify the number of vm instances."
   default     = "1"
 }
 
-variable "nb_public_ip" {
+variable "num_public_ip" {
   description = "Number of public IPs to assign corresponding to one IP per vm. Set to 0 to not assign any public IP addresses."
   default     = "1"
 }
@@ -72,6 +72,11 @@ variable "nb_public_ip" {
 variable "nsg_id" {
   description = "A Network Security Group ID to attach to the network interface."
   default = ""
+}
+
+variable "private_ip_address" {
+  description = "Defines the static IP Address which should be used."
+  default     = ""
 }
 
 variable "private_ip_address_allocation" {
@@ -122,7 +127,7 @@ variable "tags" {
     ApplicationOwner        = "Infrastructure"
     BusinessUnit            = "Infrastructure"
     Environment             = "Production"
-    InstantiationDate       = "2020-02-25"
+    InstantiationDate       = "YYYY-MM-DD"
     LastChangeRequestNumber = "RFCnnnnn"
     LifeCycleStage          = "In production"
     Location                = "Azure"
