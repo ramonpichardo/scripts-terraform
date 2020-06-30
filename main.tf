@@ -1,6 +1,6 @@
-# Pin the Azure Provider to use version 2.0.0 (see Azure Provider changelog on Github: https://github.com/terraform-providers/terraform-provider-azurerm/blob/master/CHANGELOG.md)
+# Pin the Azure Provider to use version 2.15.0 (see Azure Provider changelog on Github: https://github.com/terraform-providers/terraform-provider-azurerm/blob/master/CHANGELOG.md)
   provider "azurerm" {
-    version         = "=2.0.0"
+    version         = "=2.15.0"
     subscription_id = var.subscription_id
     tenant_id       = var.tenant_id
     features {}
