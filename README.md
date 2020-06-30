@@ -12,7 +12,7 @@ This repo is a template for building a new set of Azure Windows VMs.
 The following five variables are added as **environment variables** within the Terraform Enterprise workspace for the build set:
 
 | **Environment Variable Name** | **Environment Variable Value** | **Notes** |
-|:----------------------:|:---------:|:-------------------|
+|:----------------------:|:---------:|-------------------|
 | ARM_SUBSCRIPTION_ID | xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx | UUID-formatted Azure subscription ID. Get value via Azure Portal or run PowerShell command Get-AzSubscription. |
 | ARM_CLIENT_ID | xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx | UUID-formatted Terraform Enterprise service account ID. | 
 | ARM_TENANT_ID | xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx | UUID-formatted Azure Tenant ID. Get value via Azure Portal or run PowerShell command Get-AzSubscription. |
